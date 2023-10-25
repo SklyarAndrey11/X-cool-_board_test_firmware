@@ -1,8 +1,9 @@
+
 /*
  * DS1307.h
  *
- *  Created on: Oct 24, 2023
- *      Author: Sklya
+ *  Created on: Jul 6, 2023
+ *      Author: Loc
  */
 
 #ifndef SRC_DS1307_H_
@@ -26,6 +27,37 @@
 /*----------------------------------------------------------------------------*/
 extern I2C_HandleTypeDef *_ds1307_ui2c;
 
+typedef enum DS1307_Rate{
+	DS1307_1HZ, DS1307_4096HZ, DS1307_8192HZ, DS1307_32768HZ
+} DS1307_Rate;
+
+typedef enum DS1307_SquareWaveEnable{
+	DS1307_DISABLED, DS1307_ENABLED
+} DS1307_SquareWaveEnable;
+
+void DS1307_Init(I2C_HandleTypeDef *hi2c);
+
+void DS1307_SetClockHalt(uint8_t halt);
+uint8_t DS1307_GetClockHalt(void);
+
+
+uint8_t DS1307_SetRegByte(uint8_t regAddr, uint8_t val);
+uint8_t DS1307_GetRegByte(uint8_t regAddr);
+
+void DS1307_SetEnableSquareWave(DS1307_SquareWaveEnable mode);
+void DS1307_SetInterruptRate(DS1307_Rate rate);
+
+uint8_t DS1307_GetDayOfWeek(void);
+uint8_t DS1307_GetDay(void);
+uint8_t DS1307_GetMonth(void);
+uint16_t DS1307_GetYear(void);
+
+uint8_t DS1307_GetHour(void);
+uint8_t DS1307_GetMinute(void);
+uint8_t DS1307_GetSecond(void);
+int8_t DS1307_GetTimeZoneHour(void);
+uint8_t DS1307_GetTimeZoneMin(void);
+
 void DS1307_SetDayOfWeek(uint8_t dow);
 void DS1307_SetDay(uint8_t day);
 void DS1307_SetMonth(uint8_t month);
@@ -39,8 +71,8 @@ void DS1307_SetTimeZone(int8_t hr, uint8_t min);
 uint8_t DS1307_DecodeBCD(uint8_t bin);
 uint8_t DS1307_EncodeBCD(uint8_t dec);
 
-void DS1307_SetDate(uint8_t day, uint8_t month, uint16_t year);
-void DS1307_SetTime(uint8_t hour, uint8_t min, uint8_t sec);
+HAL_StatusTypeDef DS1307_SetDate(uint8_t day, uint8_t month, uint16_t year);
+HAL_StatusTypeDef DS1307_SetTime(uint8_t hour, uint8_t min, uint8_t sec);
 
 HAL_StatusTypeDef DS1307_GetDate(uint8_t* day, uint8_t* month, uint16_t* year);
 HAL_StatusTypeDef DS1307_GetTime(uint8_t* hour, uint8_t* min, uint8_t* second);

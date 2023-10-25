@@ -1,8 +1,8 @@
 /*
  * uart_cmd.h
  *
- *  Created on: Oct 9, 2023
- *      Author: Loc
+ *  Created on: Oct 25, 2023
+ *      
  */
 
 #ifndef UART_CMD_H_

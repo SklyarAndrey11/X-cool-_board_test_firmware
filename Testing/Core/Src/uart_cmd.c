@@ -1,8 +1,9 @@
+
 /*
  * uart_cmd.c
  *
- *  Created on: Oct 9, 2023
- *      Author: Loc
+ *  Created on: Oct 25, 2023
+ *      
  */
 
 
