@@ -1,4 +1,3 @@
-
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -21,13 +20,12 @@
 #include "main.h"
 #include "adc.h"
 #include "crc.h"
-#include "dac.h"
 #include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "spi.h"
-#include "usb_device.h"
+#include "usb_host.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -61,6 +59,8 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
+void MX_USB_HOST_Process(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -110,8 +110,7 @@ int main(void)
   MX_SPI3_Init();
   MX_RTC_Init();
   MX_CRC_Init();
-  MX_USB_DEVICE_Init();
-  MX_DAC1_Init();
+  MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
 //  test_log_init();
   event_init();
@@ -120,10 +119,12 @@ int main(void)
   buzzer_init();
   //Init i2c periph for DS1307
   DS1307_Init(&hi2c2);
-
-  board_test_init();
+  //RTD temperature sensor
+//  rtd_init();
+  //Board test
+//  board_test_init();
+  //Lcd tft 320x240
   lcd_ui_init();
-
   lcd_ui_clear();
   lcd_main_screen_screen(SPEAKER_MODE_ON, -20, POWER_MODE_DC, OPERATION_MODE_FREEZER, 80, BATTERY_STATE_CHARGING);
 //  lcd_operation_mode_screen(OPERATION_MODE_FREEZER);
@@ -150,6 +151,7 @@ int main(void)
   {
 	 event_run_task();
     /* USER CODE END WHILE */
+    MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
   }
