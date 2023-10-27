@@ -21,6 +21,7 @@
 #include "main.h"
 #include "adc.h"
 #include "crc.h"
+#include "dac.h"
 #include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
@@ -110,6 +111,7 @@ int main(void)
   MX_RTC_Init();
   MX_CRC_Init();
   MX_USB_DEVICE_Init();
+  MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
 //  test_log_init();
   event_init();
