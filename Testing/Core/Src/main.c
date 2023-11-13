@@ -23,9 +23,7 @@
 #include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
-#include "rtc.h"
 #include "spi.h"
-#include "usb_host.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -33,6 +31,13 @@
 #include "lcd_ui.h"
 #include "event.h"
 #include "DS1307.h"
+#include "led.h"
+#include "buzzer.h"
+#include "RTD.h"
+#include "board.h"
+#include "lcd_interface.h"
+#include "main_app.h"
+#include "logging.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,9 +63,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void PeriphCommonClock_Config(void);
-void MX_USB_HOST_Process(void);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -92,9 +94,6 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-/* Configure the peripherals common clocks */
-  PeriphCommonClock_Config();
-
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -108,41 +107,23 @@ int main(void)
   MX_SPI2_Init();
   MX_FATFS_Init();
   MX_SPI3_Init();
-  MX_RTC_Init();
+  MX_I2C1_Init();
   MX_CRC_Init();
-  MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
-//  test_log_init();
+
+  logging_init();
   event_init();
-  //Buzzer or led use
-  led_init();
+  //RTD temperature sensor
+  rtd_init();
+  //Buzzer
   buzzer_init();
   //Init i2c periph for DS1307
   DS1307_Init(&hi2c2);
-  //RTD temperature sensor
-//  rtd_init();
-  //Board test
-//  board_test_init();
-  //Lcd tft 320x240
-  lcd_ui_init();
-  lcd_ui_clear();
-  lcd_main_screen_screen(SPEAKER_MODE_ON, -20, POWER_MODE_DC, OPERATION_MODE_FREEZER, 80, BATTERY_STATE_CHARGING);
-//  lcd_operation_mode_screen(OPERATION_MODE_FREEZER);
-//  lcd_turn_off_unit(ON);
-//  date_time_t date = {.year = 23, .month = 10, .day = 19, .hour = 12,.minute = 11};
-//  lcd_setting_date_time(SETTING_DATE_TIME_MINUTE, &date);
-//  lcd_service(SERVICE_CALIBRATION);
-//  lcd_service_temperature(SERVICE_TEMPERATURE_FREEZER);
-//  lcd_service_alarms(SERVICE_ALARMS_BACK);
-//  lcd_service_data_calibration(SERVICE_CALIBRATION_TEMP_OFFSET);
-//  lcd_service_temper_freezer_set_point(SERVICE_TEMPERATURE_FREEZER, -5);
-//  lcd_service_temper_set_point_value(SERVICE_TEMPERATURE_FREEZER, -5);
-//  lcd_service_alarm_temp(SERVICE_ALARM_TEMP_ALARM_DELAY);
-//  lcd_service_alarm_temp_set_alarm_delay(3);
 
-//  lcd_service_alarms_warning(WARNING_MODE_FRIDGE, WARNING_TYPE_OVER_MAX_TEMP);
-//  lcd_service_data_calibration_set(15);
-  lcd_ui_refesh();
+
+  //Main app process
+  main_app_init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,7 +132,6 @@ int main(void)
   {
 	 event_run_task();
     /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
   }
@@ -182,10 +162,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_LSE
-                              |RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.MSICalibrationValue = 0;
   RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
@@ -218,32 +196,6 @@ void SystemClock_Config(void)
   /** Enable MSI Auto calibration
   */
   HAL_RCCEx_EnableMSIPLLMode();
-}
-
-/**
-  * @brief Peripherals Common Clock Configuration
-  * @retval None
-  */
-void PeriphCommonClock_Config(void)
-{
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
-
-  /** Initializes the peripherals clock
-  */
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
-  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
-  PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_MSI;
-  PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
-  PeriphClkInit.PLLSAI1.PLLSAI1N = 24;
-  PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV7;
-  PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
-  PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
-  PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_48M2CLK|RCC_PLLSAI1_ADC1CLK;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    Error_Handler();
-  }
 }
 
 /* USER CODE BEGIN 4 */
