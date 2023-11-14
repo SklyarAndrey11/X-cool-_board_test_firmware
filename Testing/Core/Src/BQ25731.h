@@ -1,10 +1,11 @@
 /*
  * BQ25731.h
  *
- *  Created on: Nov 13, 2023
+ *  Created on: Nov 14, 2023
  *      Author: Andrey
  
  */
+
 
 #ifndef INC_BQ25731_H_
 #define INC_BQ25731_H_
@@ -205,3 +206,311 @@ regulation during OTG mode
 1b: Charger is in fast charger*/
 #define IN_OTG_BIT                            0 /*default 0b: Charger is not in OTG
 1b: Charge is in OTG*/
+
+/*ChargerStatus Register (I2C address = 20h)*/
+#define FAULT_ACOV_BIT                        7 /*default 0b ChargerStatus Register (I
+2C address = 20h)*/
+#define FAULT_BATOC_BIT                       6 /*default 0b The status is latched if triggered until a read from host. Fault
+indicator for BATOC only during normal operation. However, in PTM
+mode when EN_BATOC=1b, this status bit is fault indicator for both
+BATOVP and BATOC; when EN_BATOC=0b, this status bit is not
+effective.
+0b: No fault
+1b: BATOC is triggered*/
+#define FAULT_ACOC_BIT                       5 /*default 0b The status is latched if triggered until a read from host.
+0b: No fault
+1b: ACOC*/
+#define FAULT_SYSOVP_BIT                     4 /*default 0b SYSOVP Status and Clear. SYSOVP fault is latched until a clear
+from host by writing this bit to 0.
+When the SYSOVP occurs, this bit is HIGH. During the SYSOVP, the
+converter is disabled.
+After the SYSOVP is removed, the user must write a 0 to this bit
+or unplug the adapter to clear the SYSOVP condition to enable the
+converter again.
+0b: Not in SYSOVP <default at POR>
+1b: In SYSOVP. When SYSOVP is removed, write 0 to clear the
+SYSOVP latch*/
+#define FAULT_VSYS_UVP_BIT                   3 /*default 0b VSYS_UVP fault status and clear. VSYS_UVP fault is latched until a
+clear from host by writing this bit to 0.
+0b: No fault <default at POR>
+1b: When system voltage is lower than VSYS_UVP, then 7 times
+restart tries are failed.
+*/
+#define FAULT_FORCE_CONVERTER_OFF_BIT       2 /*defaut 0bThe status is latched if triggered until a read from host.
+0b: No fault
+1b: Force converter off triggered (when FORCE_CONV_OFF
+(REG0x30[3])=1b)*/
+#define FAULT_OTG_OVP                       1 /*default 0b The status is latched if triggered until a read from host.
+0b: No fault
+1b: OTG OVP fault is triggered*/
+#define FAULT_OTG_UVP                       0 /*default 0b The status is latched if triggered until a read from host.
+0b: No fault
+1b: OTG UVP fault is triggered*/
+/*ProchotStatus Register (I2C address = 23/22h)*/
+/*. ProchotStatus Register (I2C address = 23h)*/
+#define EN_PROCHOT_EXT_BIT                 6 /*default 0b PROCHOT Pulse Extension Enable. When pulse extension is
+enabled, keep the PROCHOT pin voltage LOW until host writes
+PROCHOT _CLEAR = 0b.
+0b: Disable pulse extension <default at POR>
+1b: Enable pulse extension*/
+#define PROCHOT_WIDTH_BIT                  5 /*default 0b PROCHOT Pulse Width Minimum PROCHOT pulse width when
+EN_PROCHOT _EXT = 0b
+00b: 100 us
+01b: 1 ms
+10b: 5 ms
+11b: 10 ms <default at POR>*/
+#define PROCHOT_CLEAR_BIT                  3 /*default 0b PROCHOT Pulse Clear.
+Clear PROCHOT pulse when EN_PROCHOT _EXT = 1b.
+0b: Clear PROCHOT pulse and drive PROCHOT pin HIGH
+1b: Idle <default at POR>*/
+#define TSHUT_BIT                          2 /*default 0b TSHUT trigger:
+0b: TSHUT is not triggered
+1b: TSHUT is triggered*/
+#define STAT_VAP_FAIL_BIT                  1 /*default 0b This status bit reports a failure to load VBUS 7 consecutive times
+in VAP mode, which indicates the battery voltage might be not
+high enough to enter VAP mode, or the VAP loading current
+settings are too high.
+0b: Not is VAP failure <default at POR>
+1b: In VAP failure, the charger exits VAP mode, and latches off
+until the host writes this bit to 0.*/
+#define STAT_EXIT_VAP_BIT                  0 /*default 0b When the charger is operated in VAP mode, it can exit VAP
+by either being disabled through host, or there are ACOV/ACOC/
+SYSOVP/BATOVP/VSYS_UVP faults.
+0b: PROCHOT_EXIT_VAP is not active <default at POR>
+1b: PROCHOT_EXIT_VAP is active, PROCHOT pin is low until
+host writes this status bit to 0.*/
+/*ProchotStatus Register (I2C address = 22h)*/
+
+#define STAT_VINDPM_BIT                    7 /*default 0b PROCHOT Profile VINDPM status bit
+0b: Not triggered
+1b: Triggered, PROCHOT pin is low until host writes this status bit
+to 0 when PP_VINDPM = 1b*/
+#define STAT_COMP_BIT                      6 /*default 0b PROCHOT Profile CMPOUT status bit. The status is latched until
+a read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_ICRIT_BIT                     5 /*default 0b PROCHOT Profile ICRIT status bit. The status is latched until a
+read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_INOM_BIT                      4 /*default 0b PROCHOT Profile INOM status bit. The status is latched until a
+read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_IDCHG1_BIT                    3 /*default 0b PROCHOT Profile IDCHG1 status bit. The status is latched until a
+read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_VSYS_BIT                      2 /*default 0b PROCHOT Profile VSYS status bit. The status is latched until a
+read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_BATTERY_REMOVAL_BIT           1 /*default 0b PROCHOT Profile Battery Removal status bit. The status is
+latched until a read from host.
+0b: Not triggered
+1b: Triggered*/
+#define STAT_ADAPTER_REMOVAL_BIT           0 /*default 0b PROCHOT Profile Adapter Removal status bit. The status is
+latched until a read from host.
+0b: Not triggered
+1b: Triggered*/
+
+/*ChargeOption1 Register (I2C address = 31/30h) [reset = 3300h]*/
+
+#define EN_IBAT_BIT                       7 /*default 0b IBAT Enable
+Enable the IBAT output buffer. In low power mode (EN_LWPWR=1b), IBAT
+buffer is always disabled regardless of this bit value.
+0b Turn off IBAT buffer to minimize Iq <default at POR>
+1b: Turn on IBAT buffer*/
+#define EN_PROCHOT_LPWR_BIT               6 /*default 0b Enable PROCHOT during battery only low power mode
+With battery only, enable VSYS in PROCHOT with low power consumption. Do
+not enable this function with adapter present. Refer to Section 9.3.20.1 for more
+details.
+0b: Disable Independent Comparator low power PROCHOT <default at POR>
+1b: Enable Independent Comparator low power PROCHOT*/
+#define PSYS_CONFIG_BIT                   5 /*default 11b PSYS Enable and Definition Register
+Enable PSYS sensing circuit and output buffer (whole PSYS circuit). In low
+power mode (EN_LWPWR=1b), PSYS sensing and buffer are always disabled
+regardless of this bit value.
+00b: PSYS=PBUS+PBAT
+01b: PSYS=PBUS
+10b: Reserved
+11b: Turn off PSYS buffer to minimize Iq<default at POR>*/
+#define RSNS_RAC_BIT                     3 /*default 1b Input sense resistor RAC
+0b: 10 mΩ
+1b: 5 mΩ <default at POR>*/
+#define RSNS_RSR_BIT                     2 /*default 1b Charge sense resistor RSR
+0b: 10 mΩ
+1b: 5 mΩ <default at POR>*/
+#define PSYS_RATIO_BIT                   1 /*default 1b PSYS Gain
+Ratio of PSYS output current vs total system power
+0b: 0.25 µA/W
+1b: 1 µA/W <default at POR>*/
+#define EN_FAST_5MOHM_BIT                0 /*default 1b Enable fast compensation to increase bandwidth under 5 mΩ RAC
+(RSNS_RAC=1b) for input current up to 6.4-A application (the fast
+compensation will only work when IADPT pin is configured less than 160 kΩ)
+0b: Turn off bandwidth promotion under RSNS_RAC=1b
+(Note when this bit configured as 0b, IIN_HOST DAC can be extended up to
+10 A, writing IIN_HOST value higher than 10 A will be neglected, the ICHG
+regulation loop will be slower to guarantee stability under 6.4-A to 10-A input
+current range)
+1b: Turn on bandwidth promotion under RSNS_RAC=1b <default at POR>
+(Note when this bit configured as 1b, IIN_HOST DAC is clamped at 6.4 A,
+writing IIN_HOST value higher than 6.4 A will be neglected, the ICHG regulation
+loop will be faster within 6.4-A input current range)*/
+
+
+/*CChargeOption1 Register (I2C address = 30h)*/
+#define CMP_REF_BIT                      7 /*default 0b Independent Comparator internal Reference
+0b: 2.3 V <default at POR>
+1b: 1.2 V*/
+#define CMP_POL_BIT                      6 /*default 0b Independent Comparator output Polarity
+0b: When CMPIN is above internal threshold, CMPOUT is LOW (internal
+hysteresis) <default at POR>
+1b: When CMPIN is below internal threshold, CMPOUT is LOW (external
+hysteresis)*/
+#define CMP_DEG_BIT                     5 /*default 00b Independent comparator deglitch time, only applied to the falling edge of
+CMPOUT (HIGH → LOW).
+00b: Independent comparator is enabled with output deglitch time 5 µs <default
+at POR>
+01b: Independent comparator is enabled with output deglitch time of 2 ms
+10b: Independent comparator is enabled with output deglitch time of 20 ms
+11b: Independent comparator is enabled with output deglitch time of 5 sec*/
+#define FORCE_CONV_OFF_BIT             3 /*default 0b Force Converter Off function
+When independent comparator triggers, (CMPOUT pin pulled down) converter
+latches off, at the same time, CHRG_OK signal goes LOW to notify the system.
+Charge current is also set to zero internally, but charge current register setting
+keeps the same. To get out of converter latches off, firstly the CMPOUT should
+be released to high and secondly FORCE_CONV_OFF bit should be cleared
+(=0b).
+0b: Disable this function <default at POR>
+1b: Enable this function*/
+#define EN_PTM_BIT                     2 /*default 0b PTM enable register bit, it will automatically reset to zero
+0b: disable PTM. <default at POR>
+1b: enable PTM.*/
+#define EN_SHIP_DCHG_BIT               1 /*default 0b Discharge SRN for Shipping Mode. Used to discharge VBAT pin capacitor
+voltage which is necessary for battery gauge device shipping mode.
+When this bit is 1, discharge SRN pin down in 140 ms 20 mA. When 140 ms is
+over, this bit is reset to 0b automatically. If this bit is written to 0b by host before
+140 ms expires, VSYS should stop discharging immediately. Note if after 140-ms
+SRN voltage is still not low enough for battery gauge device entering ship mode,
+the host may need to start a new 140-ms discharge cycle.
+0b: Disable shipping mode <default at POR>
+1b: Enable shipping mode
+*/
+#define AUTO_WAKEUP_EN_BIT             0 /*default 0b Auto Wakeup Enable
+When this bit is HIGH, if the battery is below VSYS_MIN , the device should
+automatically enable 128-mA charging current for 30 mins. When the battery is
+charged up above minimum system voltage, charge will terminate and the bit is
+reset to LOW. The charger will also exit auto wake up if host write a new charge
+current value to charge current register Reg0x14().
+0b: Disable <default at POR>
+1b: Enable*/
+
+/*ChargeOption2 Register (I2C address = 33h) */
+
+#define PKPWR_TOVLD_DEG_BIT            7 /*default 00b Input Overload time in Peak Power Mode
+00b: 1 ms <default at POR>
+01b: 2 ms
+10b: 5 ms
+11b: 10 ms*/
+#define EN_PKPWR_IIN_DPM_BIT           5 /*default 0b Enable Peak Power Mode triggered by input current overshoot
+If REG0x33[5:4] are 00b, peak power mode is disabled. Upon adapter
+removal, the bits are reset to 00b.
+0b: Disable peak power mode triggered by input current overshoot
+<default at POR>
+1b: Enable peak power mode triggered by input current overshoot.*/
+#define EN_PKPWR_VSYS_BIT              4 /*default 0b Enable Peak Power Mode triggered by system voltage under-shoot
+If REG0x33[5:4] are 00b, peak power mode is disabled. Upon adapter
+removal, the bits are reset to 00b.
+0b: Disable peak power mode triggered by system voltage under-shoot
+<default at POR>
+1b: Enable peak power mode triggered by system voltage under-shoot.*/
+#define STAT_PKPWR_OVLD_BIT            3 /*default 0b Indicator that the device is in overloading cycle. Write 0 to get out of
+overloading cycle.
+0b: Not in peak power mode. <default at POR>
+1b: In peak power mode.*/
+#define STAT_PKPWR_RELAX_BIT           2 /*default 0b Indicator that the device is in relaxation cycle. Write 0 to get out of
+relaxation cycle.
+0b: Not in relaxation cycle. <default at POR>
+1b: In relaxation mode.*/
+#define PKPWR_TMAX_BIT                 1 /*default 00b Peak power mode overload and relax cycle time.
+00b: 20 ms <default at POR>
+01b: 40 ms
+10b: 80 ms
+11b: 1 sec*/
+
+/*ChargeOption2 Register (I2C address = 32h)*/
+
+#define EN_EXTILIM_BIT                7 /*default 1b Enable ILIM_HIZ pin to set input current limit
+0b: Input current limit is set by IIN_DPM register..
+1b: Input current limit is set by the lower value of ILIM_HIZ pin and
+IIN_DPM register.. <default at POR>*/
+#define EN_ICHG_IDCHG_BIT             6 /*default 0b: IBAT pin as discharge current. <default at POR>
+1b: IBAT pin as charge current.*/
+
+#define Q2_OCP_BIT                    5 /*default 1b Q2 OCP threshold by sensing Q2 VDS
+0b: 210 mV
+1b: 150 mV <default at POR>*/
+#define ACX_OCP_BIT                   4 /*default 1b Fixed Input current OCP threshold by sensing ACP-ACN, converter
+is disabled immediately when triggered non latch protection resume
+switching automatically after ACX comparator release.
+0b: 280 mV(RSNS_RAC=0b)/200 mV(RSNS_RAC=1b)
+1b: 150 mV(RSNS_RAC=0b)/100 mV(RSNS_RAC=1b) <default at
+POR>
+*/
+#define EN_ACOC_BIT                   3 /*default 0b ACOC Enable
+Configurable Input overcurrent (ACOC) protection by sensing the
+voltage across ACP and ACN. Upon ACOC (after 250-μs blank-out
+time), converter is disabled. Non latch fault, after 250-ms falling edge
+de-glitch time converter starts switching automatically.
+0b: Disable ACOC <default at POR>
+1b: ACOC threshold 133% or 200% ILIM2*/
+#define ACOC_VTH_BIT                 2 /*default 1b ACOC Limit
+Set MOSFET OCP threshold as percentage of IIN_DPM with current
+sensed from RAC.
+0b: 133% of ILIM2
+1b: 200% of ILIM2 <default at POR>*/
+#define EN_BATOC_BIT                 1 /*default 1b BATOC
+Battery discharge overcurrent (BATOC) protection by sensing the
+voltage across SRN and SRP. Upon BATOC, converter is disabled.
+0b: Disable BATOC
+1b: Enable BATOC threshold 133% or 200% PROCHOT IDCHG_TH2
+<default at POR>*/
+#define BATOC_VTH_BIT                0 /*default 1b Set battery discharge overcurrent threshold as percentage of
+PROCHOT battery discharge current limit. Note when SRN and SRP
+common voltage is low for 1S application, the BATOC threshold could
+be derating.
+0b: 133% of PROCHOT IDCHG_TH2
+1b: 200% of PROCHOT IDCHG _TH2<default at POR>*/
+/*ChargeOption3 Register (I2C address = 35/34h) [reset = 0434h]*/
+
+#define EN_HIZ_BIT                   7 /*default 0b Device HIZ Mode Enable
+When the charger is in HIZ mode, the device draws minimal quiescent
+current. With VBUS above UVLO. REGN LDO stays on, and system
+powers from battery.
+0b: Device not in HIZ mode <default at POR>
+1b: Device in HIZ mode*/
+
+#define RESET_REG_BIT               6 /*default 0b Reset Registers
+All the registers are reset to POR default setting except the VINDPM
+register.
+0b: Idle <default at POR>
+1b: Reset all the registers to default values. After reset, this bit goes back
+to 0.*/
+#define RESET_VINDPM_BIT            5 /*default 0b Reset VINDPM Threshold
+0b: Idle
+1b: Converter is disabled to measure VINDPM threshold. After VINDPM
+measurement is done, this bit goes back to 0 and converter starts*/
+#define EN_OTG_BIT                  4 /*default 0b OTG Mode Enable
+Enable device in OTG mode when OTG/VAP/FRS pin is HIGH.
+0b: Disable OTG <default at POR>
+1b: Enable OTG mode to supply VBUS from battery*/
+#define EN_ICO_MODE_BIT             3 /* default 0b Enable ICO Algorithm
+0b: Disable ICO algorithm. <default at POR>
+1b: Enable ICO algorithm.*/
+#define EN_OTG_BIGCAP_BIT           0 /*default 0b Enable OTG compensation for VBUS effective capacitance larger than 33
+μF
+0b: Disable OTG large VBUS capacitance compensation (Recommended
+for VBUS effective capacitance smaller than 33 μF) <default at POR>
+1b: Enable OTG large VBUS capacitance compensation (Recommended
+for VBUS effective capacitance larger than 33 μF)*/
