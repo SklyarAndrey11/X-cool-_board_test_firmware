@@ -1,10 +1,7 @@
 /*
  * BQ25731.c
  *
- *  Created on: Nov 13, 2023
- *      Author: Andrey
  */
-
 
 
 #include "BQ25731.h"
@@ -31,7 +28,6 @@ HAL_StatusTypeDef bq25731_get_manufacture_id(uint8_t* man_id)
 {
 	return bq25731_read_reg(MANUFATURER_ID_REG, man_id, 1);
 }
-
 
 
 

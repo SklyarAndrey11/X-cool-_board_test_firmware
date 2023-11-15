@@ -1,11 +1,6 @@
 /*
  * BQ25731.h
- *
- *  Created on: Nov 14, 2023
- *      Author: Andrey
- 
  */
-
 
 #ifndef INC_BQ25731_H_
 #define INC_BQ25731_H_
@@ -514,3 +509,297 @@ Enable device in OTG mode when OTG/VAP/FRS pin is HIGH.
 for VBUS effective capacitance smaller than 33 μF) <default at POR>
 1b: Enable OTG large VBUS capacitance compensation (Recommended
 for VBUS effective capacitance larger than 33 μF)*/
+
+/*ChargeOption3 Register (I2C address = 34h)*/
+#define EN_VBUS_VAP_BIT             6 /*default 0b Enable the VBUS VAP for VAP operation mode 2&3
+0b: Disabled <default at POR>
+1b: Enabled
+*/
+#define OTG_VAP_MODE_BIT            5 /*default 1b The selection of the external OTG/VAP/FRS pin control. Don't
+recommend to change pin control after OTG/VAP/FRS pin is pulled high.
+0b: the external OTG/VAP/FRS pin controls the EN/DIS VAP mode
+1b: the external OTG/VAP/FRS pin controls the EN/DIS OTG mode
+<default at POR>
+*/
+#define IL_AVG_BIT                  4 /*default 10b Converter inductor average current clamp. It is recommended to choose
+the smallest option which is higher than maximum possible converter
+average inductor current.
+00b: 6A
+01b: 10A
+10b: 15A <default at POR>
+11b: Disabled
+*/
+
+#define CMP_EN_BIT                 2 /*default 1b Enable Independent Comparator with effective low.
+0b: Disabled
+1b: Enabled <default at POR>*/
+#define PSYS_OTG_IDCHG_BIT         0 /*default 0b PSYS function during OTG mode.
+0b: PSYS as battery discharge power minus OTG output power <default
+at POR>
+1b: PSYS as battery discharge power only*/
+
+
+/*ProchotOption0 Register (I2C address = 37/36h) [reset = 4A81h(2S~5s)*/
+/*ProchotOption0 Register (I2C address = 37h) */
+
+#define ILIM2_VTH_BIT              7 /*default 01001b ILIM2 Threshold
+5 bits, percentage of IIN_DPM in 0x22H. Measure current between ACP and
+ACN.
+Trigger when the current is above this threshold:
+00001b - 11001b: 110% - 230%, step 5%
+11010b - 11110b: 250% - 450%, step 50%
+11111b: Out of Range (Ignored)
+Default 150%, or 01001
+*/
+#define ICRIT_DEG_BIT             2 /*default 01 ICRIT Deglitch time
+ICRIT threshold is set to be 110% of ILIM2.
+Typical ICRIT deglitch time to trigger PROCHOT.
+00b: 15 µs
+01b: 100 µs <default at POR>
+10b: 400 µs (max 500 μs)
+11b: 800 µs (max 1 ms)
+*/
+#define PROCHOT_VINDPM_80_90      0 /*default 0b Lower threshold of the PROCHOT_VINDPM comparator
+When REG0x33[0]=1, the threshold of the PROCHOT_VINDPM comparator is
+determined by this bit setting.
+0b: 83% of VinDPM threshold <default at POR>.
+1b: 91% of VinDPM threshold
+*/
+
+#define VSYS_TH1_BIT              7 /*default 100000b(2S~5s)000010b(1S) VSYS Threshold to trigger discharging VBUS in VAP mode.
+Measure on VSYS with fixed 5-µs deglitch time. Trigger when SYS pin voltage is
+below the thresholds. There is a fixed DC offset which is 3.2 V.
+2S - 5s battery (Default: 6.4 V)
+000000b- 111111b: 3.2 V - 9.5 V with 100-mV step size.
+1S battery (Default: 3.4 V)
+XXX000b - XXX111b: 3.2 V - 3.9 V with 100-mV step size*/
+#define INOM_DEG_BIT              1 /*default 0b INOM Deglitch Time
+INOM is always 10% above IIN_DPM register setting. Measure current between
+ACP and ACN.
+Trigger when the current is above this threshold.
+0b: 1 ms(max) <default at POR>
+1b: 60 ms(max)*/
+#define LOWER_PROCHOT_VINDPM     0 /*default 1b Enable the lower threshold of the PROCHOT_VINDPM comparator
+0b: the threshold of the PROCHOT_VINDPM comparator follows the same
+VINDPM REG0x3D() setting.
+1b: the threshold of the PROCHOT_VINDPM comparator is lower and determined
+by PROCHOT_VINDPM_80_90 bit setting. <default at POR>*/
+
+/*ProchotOption1 Register (I2C address = 39h)*/
+#define IDCHG_TH1_BIT            7 /*default 010000b IDCHG level 1 Threshold
+6 bit, range, range 0 A to 64512 mA, step 1024 mA.
+Measure current between SRN and SRP.
+Trigger when the discharge current is above the threshold.
+If the value is programmed to 000000b PROCHOT is always triggered.
+Default: 16256 mA or 010000b*/
+#define IDCHG_DEG1_BIT           1 /*default 0b IDCHG level 1 Deglitch Time
+00b: 78 ms
+01b: 1.25s <default at POR>
+10b: 5s
+11b: 20s*/
+#define PP_VINDPM_BIT            7 /*default 1b VINDPM PROCHOT Profile
+When all the REG0x38[7:0] , REG0x3D[1], REG0x3C[2]bits are 0, PROCHOT
+function is disabled.
+0b: disable
+1b: enable<default at POR>*/
+#define PP_COMP_BIT              6 /*default 0 Independent comparator PROCHOT Profile
+When not in low power mode(Battery only), use this bit to control independent
+comparator PROCHOT profiles.
+When in low power mode(Battery only), this bit will lose controllability
+to independent comparator PROCHOT profiles. Need to use
+EN_PROCHOT_LPWR to enable independent comparator and its PROCHOT
+profile.
+0b: disable <default at POR>
+1b: enable*/
+#define PP_ICRIT_BIT             5 /*default 1b ICRIT PROCHOT Profile
+0b: disable
+1b: enable <default at POR>*/
+#define PP_INOM_BIT              4 /*default 0b INOM PROCHOT Profile
+0b: disable <default at POR>
+1b: enable*/
+#define PP_IDCHG1_BIT            3 /*default 0b IDCHG1 PROCHOT Profile
+0b: disable <default at POR>
+1b: enable*/
+#define PP_VSYS_BIT              2 /*default 0b VSYS PROCHOT Profile
+0b: disable <default at POR>
+1b: enable*/
+#define PP_BATPRES_BIT           1 /*default 0b Battery removal PROCHOT Profile
+0b: disable <default at POR>
+1b: enable (one-shot falling edge triggered)
+If BATPRES is enabled in PROCHOT after the battery is removed, it will
+immediately send out one-shot PROCHOT pulse*/
+#define PP_ACOK_BIT              0 /*default 0b Adapter removal PROCHOT Profile
+0b: disable <default at POR>
+1b: enable
+EN_LWPWR= 0b to assert PROCHOT pulse after adapter removal.
+If PP_ACOK is enabled in PROCHOT after the adapter is removed, it will be
+pulled low.*/
+
+/*ADCOption Register (I2C address = 3B/3Ah) [reset = 2000h]*/
+#define ADC_CONV_BIT            7 /*default 0b Typical each ADC channel conversion time is 25 ms maximum. Total ADC
+conversion time is the product of 25 ms and enabled channel counts.
+0b: One-shot update. Do one set of conversion updates to registers
+REG0x29/28(), REG0x27/26(), REG0x2B/2A(), and REG0x2D/2C() after
+ADC_START = 1.
+1b: Continuous update. Do a set of conversion updates to registers
+REG0x29/28(), REG0x27/26(), REG0x2B/2A(), and REG0x2D/2C()every 1
+sec*/
+#define ADC_START_BIT           6 /*default 0b 0b: No ADC conversion
+1b: Start ADC conversion. After the one-shot update is complete, this bit
+automatically resets to zero*/
+#define ADC_FULLSCALE_BIT       5 /*default 1b ADC input voltage range adjustment for PSYS and CMPIN ADC Channels.
+2.04-V full scale holds 8 mV/LSB resolution and 3.06-V full scale holds 12
+mV/LSB resolution
+0b: 2.04 V
+1b: 3.06 V <default at POR>(Not accurate for REGN<6-V application (VBUS& VSYS< 6V))*/
+
+/*ADCOption Register (I2C address = 3Ah)*/
+
+#define EN_ADC_CMPIN_BIT        7 /*default 0b 0b: Disable <default at POR>
+1b: Enable*/
+#define EN_ADC_VBUS_BIT         6
+#define EN_ADC_PSYS_BIT         5
+#define EN_ADC_IIN_BIT          4
+#define EN_ADC_IDCHG_BIT        3
+#define EN_ADC_ICHG_BIT         2
+#define EN_ADC_VSYS_BIT         1
+#define EN_ADC_VBAT_BIT         0
+
+/*ChargeOption4 Register (I2C address = 3D/3Ch) [reset = 0048h]*/
+
+#define EN_DITHER_BIT           4 /*default 00b Frequency Dither configuration
+00b: Disable Dithering<default at POR>
+01b: Dither 1X (±2% Fs dithering range)
+10b: Dither 2X (±4% Fs dithering range)
+11b: Dither 3X (±6% Fs dithering range)*/
+#define PP_VBUS_VAP_BIT         1 /*VBUS_VAP PROCHOT Profile
+0b: disable <default at POR>
+0b: enable*/
+#define STAT_VBUS_VAP_BIT       0 /*default 0b PROCHOT profile VBUS_VAP status bit. The status is latched until a read
+from host.
+0b: Not triggered <default at POR>
+1b: Triggered*/
+
+/*ChargeOption4 Register (I2C address = 3Ch)*/
+#define IDCHG_DEG2_BIT          7 /*default 01 Battery discharge current limit 2 deglitch time(minimum value)
+00b: 100 μs
+01b: 1.6 ms <default at POR>
+10b: 6 ms
+11b: 12 ms*/
+#define IDCHG_TH2_BIT           5 /*default 001b Battery discharge current limit2 based on percentage of IDCHG_TH1.
+Note IDCHG_TH2 setting higher than 32256 mA should lose accuracy
+de-rating between target value and 32256 mA. (Recommend not to set
+higher than 20 A for 1S OTG boost operation)
+000b: 125% IDCHG_TH1
+001b: 150% IDCHG_TH1 <default at POR>
+010b: 175% IDCHG_TH1
+011b: 200% IDCHG_TH1
+100b: 250% IDCHG_TH1
+101b: 300% IDCHG_TH1
+110b: 350% IDCHG_TH1
+111b: 400% IDCHG_TH1*/
+
+#define PP_IDCHG2_BIT           2 /*default 0b IDCHG2 PROCHOT Profile
+0b: disable <default at POR>
+1b: enable*/
+#define STAT_IDCHG2_BIT         1 /*default 0b The status is latched until a read from host.
+0b: Not triggered <default at POR>
+1b: Triggered
+*/
+#define STAT_PTM_BIT            0 /*default 0b PTM operation status bit monitor
+0b: Not in PTM Operation <default at POR>
+1b: In PTM Operation*/
+
+/*Vmin Active Protection Register (I2C address = 3F/3Eh)  [reset = 0070h/0004h]*/
+/*0 = Adds 0 mV of VAP Mode VBUS PROCHOT trigger voltage threshold
+1 = Adds x mV of VAP Mode VBUS PROCHOT trigger voltage threshold
+ * */
+#define VBUS_VAP_TH_6400_MV_BIT     7
+#define VBUS_VAP_TH_3200_MV_BIT     6
+#define VBUS_VAP_TH_1600_MV_BIT     5
+#define VBUS_VAP_TH_800_MV_BIT      4
+#define VBUS_VAP_TH_400_MV_BIT      3
+#define VBUS_VAP_TH_200_MV_BIT      2
+#define VBUS_VAP_TH_100_MV_BIT      1
+
+/*Vmin Active Protection Register (I2C address = 3Eh) */
+/*0 = Adds 0 mV of VAP mode VSYS PROCHOT trigger voltage threshold
+1 = Adds x mV of VAP mode VSYS PROCHOT trigger voltage threshold*/
+#define VSYS_TH2_3200_MV_BIT        7
+#define VSYS_TH2_1600_MV_BIT        6
+#define VSYS_TH2_800_MV_BIT         5
+#define VSYS_TH2_400_MV_BIT         4
+#define VSYS_TH2_200_MV_BIT         3
+#define VSYS_TH2_100_MV_BIT         2
+#define EN_VSYSTH2_FOLLOW_VSYSTH1_BIT   1 /*default 0b Enable internal VSYS_TH2 follow VSYS_TH1 setting neglecting register
+REG37[7:2] setting
+0b: disable <default at POR>
+1b: enable*/
+#define EN_FRS_BIT                  0   /*default 0b Fast Role Swap feature enable (note not recommend to change EN_FRS
+during OTG operation, the FRS bit from 0 to 1 change will disable power
+stage for about 200 μs (Fs = 400 kHz). HIZ mode holds higher priority, If
+EN_HIZ=1b, this EN_FRS bit should be forced to 0b.
+0b: disable <default at POR>
+1b: enable*/
+
+/* OTGVoltage Register (I2C address = 07/06h) [reset = 09C4h]*/
+/*OTGVoltage Register (I2C address = 07h)*/
+/*0 = Adds 0 mV of OTG voltage.
+1 = Adds x mV of OTG voltage.*/
+#define OTG_VOLTAGE_16384_MV_BIT        5
+#define OTG_VOLTAGE_8192_MV_BIT         4
+#define OTG_VOLTAGE_4096_MV_BIT         3
+#define OTG_VOLTAGE_2048_MV_BIT         2
+#define OTG_VOLTAGE_1024_MV_BIT         1
+#define OTG_VOLTAGE_512_MV_BIT          0
+
+
+/* OTGVoltage Register (I2C address = 06h)*/
+/*0 = Adds 0 mV of OTG voltage.
+1 = Adds x mV of OTG voltage.*/
+#define OTG_VOLTAGE_256_MV_BIT          7
+#define OTG_VOLTAGE_128_MV_BIT          6
+#define OTG_VOLTAGE_64_MV_BIT           5
+#define OTG_VOLTAGE_32_MV_BIT           4
+#define OTG_VOLTAGE_16_MV_BIT           3
+#define OTG_VOLTAGE_8_MV_BIT            2
+
+/*OTGCurrent Register (I2C address = 09/08h) [reset = 3C00h]*/
+/*. OTGCurrent Register (I2C address = 09h*/
+/*0 = Adds 0 mA of OTG current.
+1 = Adds x mA of OTG current.*/
+#define OTG_CURRENT_3200_MA_BIT        6
+#define OTG_CURRENT_1600_MA_BIT        5
+#define OTG_CURRENT_800_MA_BIT         4
+#define OTG_CURRENT_400_MA_BIT         3
+#define OTG_CURRENT_200_MA_BIT         2
+#define OTG_CURRENT_100_MA_BIT         1
+#define OTG_CURRENT_50_MA_BIT          0
+
+/* InputVoltage(VINDPM) Register (I2C address = 0B/0Ah) [reset =VBUS-1.28V]*/
+/*0 = Adds 0 mV of input voltage.
+1 = Adds x mV of input voltage.*/
+#define INPUT_VOLTAGE_8192_MV          5
+#define INPUT_VOLTAGE_4096_MV          4
+#define INPUT_VOLTAGE_2048_MV          3
+#define INPUT_VOLTAGE_1024_MV          2
+#define INPUT_VOLTAGE_512_MV           1
+#define INPUT_VOLTAGE_256_MV           0
+/* InputVoltage Register (I2C address = 0Ah)*/
+#define INPUT_VOLTAGE_128_MV           7
+#define INPUT_VOLTAGE_64_MV            6
+
+/*IIN_HOST Register (I2C address = 0F/0Eh) [reset = 2000h]*/
+/*0 = Adds 0 mA of input current.
+1 = Adds x mA of input current.*/
+#define INPUT_CURRENT_6400_MA         6
+#define INPUT_CURRENT_3200_MA         5
+#define INPUT_CURRENT_1600_MA         4
+#define INPUT_CURRENT_800_MA          3
+#define INPUT_CURRENT_400_MA          2
+#define INPUT_CURRENT_200_MA          1
+#define INPUT_CURRENT_100_MA          0
+
+
+
+#endif /* INC_BQ25731_H_ */
